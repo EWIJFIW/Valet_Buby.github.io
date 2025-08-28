@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Валет Буби</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff, #f0f0f0, #e0e0e0);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            text-align: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .title {
+            font-size: 3rem;
+            color: #e74c3c;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .instructions {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            color: #34495e;
+        }
+        
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        
+        .card {
+            width: 180px;
+            height: 250px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .card-front {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .card-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+            border: 5px solid #e74c3c;
+        }
+        
+        .card-back.diamonds {
+            color: #e74c3c;
+        }
+        
+        .result {
+            font-size: 2rem;
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .win {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .lose {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .problem {
+            font-size: 1.5rem;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .shuffle-animation {
+            animation: shuffle 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes shuffle {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(10px); }
+            50% { transform: translateX(-10px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                width: 120px;
+                height: 180px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .instructions {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <audio autoplay loop controls style="display: none;">
+        <source src="пеня.mp3" type="audio/mpeg">
+    </audio>
+    <div class="container">
+        <h1 class="title">Валет Буби</h1>
+        <p class="instructions">Выберите одну из карт. Если вы вытяните карту "Валет буби", то поздравляю, вы выиграли! Иначе - решайте задачку!</p>
+        
+        <div class="cards-container" id="cards-container">
+            <div class="card" data-card="1">
+                <div class="card-inner">
+                    <div class="card-front">1</div>
+                    <div class="card-back">7♠</div>
+                </div>
+            </div>
+            
+            <div class="card" data-card="2">
+                <div class="card-inner">
+                    <div class="card-front">2</div>
+                    <div class="card-back diamonds">J♦</div>
+                </div>
+            </div>
+            
+            <div class="card" data-card="3">
+                <div class="card-inner">
+                    <div class="card-front">3</div>
+                    <div class="card-back">Q♣</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="result" class="result"></div>
+        
+        <div id="problem" class="problem"></div>
+        
+        <button id="restart-btn" class="btn">Играть снова</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardsContainer = document.getElementById('cards-container');
+            const cards = document.querySelectorAll('.card');
+            const resultDiv = document.getElementById('result');
+            const problemDiv = document.getElementById('problem');
+            const restartBtn = document.getElementById('restart-btn');
+            
+            const problems = [
+                "Велосипедист движется со скоростью 5 м/с. Какой путь он преодолеет за 30 минут?",
+                "Из двух пунктов, расстояние между которыми 10 км, выехали одновременно навстречу друг другу два велосипедиста. Скорость первого 15 км/ч, второго — 10 км/ч. Через какое время они встретятся?",
+                "Масса медного шара 840 г, его объем 120 см³. Сплошной этот шар или полый? (Плотность меди ρмеди = 8900 кг/м³)",
+                "Какое количество теплоты потребуется, чтобы нагреть 2 кг воды от 20°C до кипения (100°C)? Удельная теплоемкость воды cвод = 4200 Дж/(кг*°C)",
+                "Электрический утюг мощностью 1200 Вт работает при напряжении 220 В. Определите силу тока в нагревательном элементе и его сопротивление.",
+                "Бетонная плита объемом 0.5 м³ лежит на дне озера. Какую силу необходимо приложить, чтобы поднять ее со дна? (Плотность бетона ρбет = 2300 кг/м³, воды ρвод = 1000 кг/м³)",
+                "Катер проплывает по течению реки 30 км за 2 часа, а против течения — за 3 часа. Найдите скорость течения реки.",
+                "Два велосипедиста выехали одновременно навстречу друг другу из двух пунктов, расстояние между которыми 60 км, и встретились через 2 часа. Найдите скорость каждого, если один проехал до встречи на 12 км больше другого."
+            ];
+            
+            let currentCards = Array.from(cards);
+            let winningCardIndex;
+            
+            function shuffleCards() {
+                cardsContainer.innerHTML = '';
+                
+                const shuffledCards = [...currentCards].sort(() => Math.random() - 0.5);
+                shuffledCards.forEach(card => {
+                    cardsContainer.appendChild(card);
+                    card.classList.remove('flipped');
+                    card.style.opacity = "1";
+                    card.style.cursor = "pointer";
+                    card.classList.add('shuffle-animation');
+                });
+                
+                setTimeout(() => {
+                    shuffledCards.forEach(card => {
+                        card.classList.remove('shuffle-animation');
+                    });
+                }, 500);
+                
+                winningCardIndex = Math.floor(Math.random() * 3);
+                shuffledCards[winningCardIndex].querySelector('.card-back').textContent = 'J♦';
+                shuffledCards[winningCardIndex].querySelector('.card-back').className = 'card-back diamonds';
+                
+                const otherCards = shuffledCards.filter((_, index) => index !== winningCardIndex);
+                otherCards[0].querySelector('.card-back').textContent = '7♠';
+                otherCards[0].querySelector('.card-back').className = 'card-back';
+                
+                otherCards[1].querySelector('.card-back').textContent = 'Q♣';
+                otherCards[1].querySelector('.card-back').className = 'card-back';
+                
+                currentCards = shuffledCards;
+            }
+            
+            function getRandomProblem() {
+                const randomIndex = Math.floor(Math.random() * problems.length);
+                return problems[randomIndex];
+            }
+            
+            shuffleCards();
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    if (this.classList.contains('flipped')) return;
+                    
+                    this.classList.add('flipped');
+                    
+                    const cardIndex = currentCards.indexOf(this);
+                    
+                    setTimeout(() => {
+                        if (cardIndex === winningCardIndex) {
+                            resultDiv.textContent = "Вы вытянули 'Валета буби'. Поздравляю с победой!";
+                            resultDiv.className = "result win";
+                        } else {
+                            resultDiv.textContent = "Вы вытянули не 'Валета буби'. Решайте задачку!";
+                            resultDiv.className = "result lose";
+                            problemDiv.innerHTML = `<h3>Решите задачку:</h3><p>${getRandomProblem()}</p>`;
+                            problemDiv.style.display = "block";
+                        }
+                        
+                        resultDiv.style.display = "block";
+                        restartBtn.style.display = "inline-block";
+                        
+                        currentCards.forEach(c => {
+                            c.style.cursor = "default";
+                            if (!c.classList.contains('flipped')) {
+                                c.style.opacity = "0.6";
+                            }
+                        });
+                    }, 600);
+                });
+            });
+            
+            restartBtn.addEventListener('click', function() {
+                shuffleCards();
+                resultDiv.style.display = "none";
+                problemDiv.style.display = "none";
+                this.style.display = "none";
+            });
+        });
+    </script>
+    <p class="instructions">ТГК - t.me/general_adecvat</p>
+</body>
+</html>
